@@ -209,60 +209,6 @@ bool isContaionCylcleUnDirected(Graph &g) {
     return false;
 }
 
-string dijksra(Graph &g, int start, int end)
-{
-
-    size_t n = g.getNumVertices();
-    vector<int> dist(n, INT_MAX);   // Distance from start to each vertex, initiliazed to infinity
-    vector<int> parent(n, -1);      // Parent of each vertex in the shortest path
-    vector<bool> visited(n, false); // Visited vertices
-
-    
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-
-    // The distance from start to itself is 0
-    dist[(size_t)start] = 0;
-    pq.push({0, start});
-
-    while (!pq.empty())
-    {
-        int u = pq.top().second;
-        pq.pop();
-
-        visited[(size_t)u] = true; // Updating to visited
-
-        if (u == end) // If we've reached the end we want to reconstruct the path
-        {
-            // Reconstruct the path from end to start
-            string path = to_string(end);
-            while (parent[(size_t)end] != -1) // Going over the parent vector
-            {
-                // path = to_string(parent[(size_t)end]) + " -> " + path;
-                path.insert(0, to_string(parent[(size_t)end]) + " -> ");
-                end = parent[(size_t)end];
-            }
-            return path;
-        }
-
-        // finding all the vertices we can get from u
-        for (size_t i = 0; i < n; ++i)
-        {
-            // Relax
-            if (g.getAdjMatrix()[(size_t)u][i] != 0 && !visited[i])
-            {
-                int newDist = dist[(size_t)u] + g.getAdjMatrix()[(size_t)u][i];
-                if (newDist < dist[i])
-                {
-                    dist[i] = newDist;
-                    parent[i] = (size_t)u;
-                    pq.push({dist[i], i});
-                }
-            }
-        }
-    }
-    // Mean we haven't find a path
-    return "No path found";
-}
 
 
 
