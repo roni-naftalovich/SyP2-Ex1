@@ -305,65 +305,6 @@ string bellmanFord(Graph &g, int start, int end)
 }
 
 
-vector<int> negativeCyclePath(Graph g) 
-{
-    size_t n = g.getNumVertices();
-    vector<int> distance(n, INT_MAX);
-    vector<int> predecessor(n, -1);
-    int cycle_start = -1; // Will be the vertex where the cycle starts, if exists
-
-    // Assume the source vertex is 0, for checking the negative cycle we'll run bellman-ford from the first vertex
-    distance[0] = 0;
-
-    // Runing n iterations to check if there is a negative cycle
-    for (size_t i = 0; i < n; ++i)
-    {
-        cycle_start = -1; // Initilzing it in each iteration, in the last iteration if there is still relax, it will update the start of the cycle further
-        for (size_t u = 0; u < n; ++u)
-        {
-            for (size_t v = 0; v < n; ++v)
-            {
-                if (g.getAdjMatrix()[u][v] != 0)
-                {
-                    // Relax the edge
-                    int new_distance = distance[u] + g.getAdjMatrix()[u][v];
-                    if (new_distance < distance[v])
-                    {
-                        distance[v] = new_distance;
-                        predecessor[v] = (int)u;
-                        cycle_start = v; // because if in the last iteration (n itreration) there is still relax,
-                                         // means there is a negative cycle and we want to save the start.
-                    }
-                }
-            }
-        }
-    }
-
-    vector<int> cycle;     // To reconstruct the cycle if there is one
-    if (cycle_start != -1) // means we found a strat of the cycke and it have kept the vertex that is starting from
-    {
-        // We found a negative cycle
-        // Go n steps back to make sure we are in the cycle
-        int v = cycle_start;
-        for (size_t i = 0; i < n; ++i)
-        {
-            v = predecessor[(size_t)v];
-        }
-
-        // Add vertices to the cycle
-        for (int u = v;; u = predecessor[(size_t)u])
-        {
-            cycle.push_back(u);
-            if (u == v && cycle.size() > 1) // means we've got to the strat of the cycle, and it's bigger than 1, that t is not only one vertex
-            {
-                break;
-            }
-        }
-        reverse(cycle.begin(), cycle.end()); // beacuse we went backwards, we need to revers the cycle to get it
-    }
-
-    return cycle;
-}
 
 
 bool Algorithms::isConnected(Graph &g)

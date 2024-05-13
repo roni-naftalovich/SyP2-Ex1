@@ -21,7 +21,7 @@ namespace ariel
 
     public:
         // Constructor that getting  if the graph is directed or not
-        Graph(bool isDirected = false); // default constructor is not directed
+        Graph(bool isDirected); // default constructor is not directed
 
         size_t getNumVertices() const;
         

@@ -108,6 +108,7 @@ int main()
     {0, 0, 0, 0, 0}
 };
 g4.loadGraph(graph6);
+g4.printGraph();
 
     cout << Algorithms::isConnected(g4) << endl;        // Should print: "1" (true).
     cout << Algorithms::shortestPath(g4, 0, 4) << endl; // Should print: 0->1->2->3->4.

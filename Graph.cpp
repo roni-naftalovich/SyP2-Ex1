@@ -11,7 +11,7 @@ using namespace ariel;
 Graph::Graph(bool isDirected)
 {
     this->isDirected = isDirected;
-    this->isWeighted = true; //temporarly
+    this->isWeighted = false; //temporarly
     this->numVertices = 0;
 }
 
@@ -34,7 +34,7 @@ bool Graph::getisDirected() const
 void Graph::loadGraph(vector<vector<int>> &matrix)
 {
     if (matrix.size() !=  matrix[0].size() || matrix.size()==0) {
-            cerr << "Invalid adjacency matrix " << endl;
+            cerr << "Invalid adjacency matrix - not square" << endl;
             return;
         }
 
@@ -46,7 +46,7 @@ void Graph::loadGraph(vector<vector<int>> &matrix)
         {
             if (i == j && adjMatrix[i][j] != 0)
             {
-               cerr << "Invalid adjacency matrix "<< endl;
+               cerr << "Invalid adjacency matrix - diagonal must be zero "<< endl;
                return;
             }
         }
@@ -56,7 +56,7 @@ void Graph::loadGraph(vector<vector<int>> &matrix)
 
 void Graph::printGraph()
 {
-    if (this->isDirected)
+    if (this->isDirected==true)
     {
         cout << "The graph is directed, containing " << this->numVertices << " vertices" << endl;
     }
@@ -76,11 +76,11 @@ void Graph::isDirectedAndWeighted(vector<vector<int>> &matrix) // for graph bein
     {
         for (size_t j = 0; j < matrix[i].size(); j++)
         {
-            if (this->isDirected== true && matrix[i][j] != matrix[j][i])
+            if (this->isDirected== false && matrix[i][j] != matrix[j][i])
             {
-                this->isDirected= false;
+                this->isDirected= true;
             }
-            if(matrix[i][j] !=0 && matrix[i][j]!=1)
+            if(this->isWeighted == false && matrix[i][j] !=0 && matrix[i][j]!=1)
             {
                 this->isWeighted=true;
             }
