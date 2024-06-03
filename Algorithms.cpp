@@ -6,10 +6,12 @@
 #include "Algorithms.hpp"
 #include <string>
 #include <climits>
+#include <limits>
 #include <queue>
 #include <stack>
 #include <algorithm>
 #include <sstream>
+
 
 using namespace std;
 using namespace ariel;
@@ -181,7 +183,7 @@ bool dfsCycleDetectionUnDirected(Graph &g, size_t v, int parent, std::vector<boo
     // Go through all adjacent vertices of v
     for (size_t i = 0; i < g.getNumVertices(); ++i) {
         // If an adjacent vertex is not visited yet, then recur for it
-        if (g.getAdjMatrix()[v][i]) { // Assuming getAdjMatrix() returns the adjacency matrix
+        if (g.getAdjMatrix()[v][i]) { 
             if (!visited[i]) {
                 if (dfsCycleDetectionUnDirected(g, i, v, visited))
                     return true;
@@ -249,6 +251,78 @@ std::string BFS(Graph &g, int start, int end) {
 
     return "No path exist";
 }
+
+string dijkstra(Graph &g, int start, int end) {
+    size_t numVertices = g.getNumVertices();
+    size_t startIndex = static_cast<size_t>(start);
+    size_t endIndex = static_cast<size_t>(end);
+
+    vector<int> dist(numVertices, numeric_limits<int>::max());
+    vector<size_t> prev(numVertices, numeric_limits<size_t>::max());
+    priority_queue<pair<int, size_t>, vector<pair<int, size_t>>, greater<pair<int, size_t>>> pq;
+
+    dist[startIndex] = 0;
+    pq.emplace(0, startIndex);
+
+    while (!pq.empty()) {
+        size_t u = pq.top().second;
+        pq.pop();
+
+        if (u == endIndex) {
+            break;
+        }
+
+        for (size_t v = 0; v < numVertices; v++) {
+            if (g.getAdjMatrix()[u][v] != 0) {
+                int weight = g.getAdjMatrix()[u][v];
+
+                if (dist[u] + weight < dist[v]) {
+                    dist[v] = dist[u] + weight;
+                    prev[v] = u;
+                    pq.emplace(dist[v], v);
+                }
+            }
+        }
+    }
+
+    if (dist[endIndex] == numeric_limits<int>::max()) {
+        return "No path exists";
+    } else {
+        stringstream pathStream;
+        vector<size_t> path;
+        for (size_t at = endIndex; at != numeric_limits<size_t>::max(); at = prev[at]) {
+            path.push_back(at);
+        }
+        reverse(path.begin(), path.end());
+
+        for (size_t i = 0; i < path.size(); ++i) {
+            pathStream << path[i];
+            if (i < path.size() - 1) {
+                pathStream << " -> ";
+            }
+        }
+        return pathStream.str();
+    }
+
+
+    if (dist[static_cast<size_t>(end)] == numeric_limits<int>::max()) {
+        return "No path exists";
+    } else {
+        stringstream pathStream;
+        vector<size_t> path;
+        for (size_t at = static_cast<size_t>(end); at != -1; at = prev[at]) {
+            path.push_back(at);
+        }
+        reverse(path.begin(), path.end());
+
+        for (size_t i = 0; i < path.size(); ++i) {
+            pathStream << path[i];
+            if (i < path.size() - 1) {
+                pathStream << " -> ";
+            }
+        }
+        return pathStream.str();
+    }}
 
 
 string bellmanFord(Graph &g, int start, int end)
@@ -335,23 +409,26 @@ string Algorithms::shortestPath(Graph &g, int start, int end)
 {
     if (start < 0 || start >= g.getNumVertices() || end < 0 || end >= g.getNumVertices())
     {
-        return "Illegal start & end values";
+        return "Illegal start & end values, cannot define shortest path";
     }
 
-   if(g.getisWeighted()== false){
+    if(g.getisWeighted()== false){
         return BFS(g, start, end);
-    }else
+    }else if(g.getisDirected()== false && g.getisWeighted()==true && !negativeCycle(g)){
+        return dijkstra(g, start, end);
+    }else{
         return bellmanFord(g, start, end);
-    }
+    }}
 
 // To check negative cycle in a graph we just need to run bellman-ford algorithm and che what have returned
-void Algorithms::negativeCycle(Graph &g){
+bool Algorithms::negativeCycle(Graph &g){
             size_t numVertices = g.getNumVertices();
             vector<int> dist(numVertices, INT_MAX);
             vector<size_t> parent(numVertices, 0);
             dist[0] = 0; // Starting vertex
             parent[0]= 0;
             size_t cycleVertex= INT_MAX;
+            bool flag= false;
 
             // Relax all edges V-1 times
             for (int i = 0; i < numVertices - 1; i++)
@@ -378,6 +455,7 @@ void Algorithms::negativeCycle(Graph &g){
                     int weight = g.getAdjMatrix()[u][v];
                     if (dist[u] != INT_MAX && (weight != 0 || u == v) && dist[u] + weight < dist[v])
                     {
+                        flag= true;
                         cout<< "Negative cycle detected :" << endl;
                          // Negative cycle detected, backtrack to find a vertex in the cycle
                         cycleVertex = v;
@@ -392,47 +470,71 @@ void Algorithms::negativeCycle(Graph &g){
                         }
                           cycleVertices += " -> " + std::to_string(cycleVertex);
                           cout<< cycleVertices <<endl;
-                          return;
+                          return flag;
                     }
                 }
             }
 
             cout<< "No negative cycle detected."<<endl;
+            return flag;
         }
     
 
 
-void Algorithms::isBipartite(Graph &g) {
+bool Algorithms::isBipartite(Graph &g) {
+    // Get the number of vertices in the graph
     size_t numVertices = g.getNumVertices();
-    std::vector<size_t> color(numVertices, 4); // Initialize colors: -1 for unvisited, 0 and 1 for two groups
-    std::vector<std::vector<size_t>> groups(2); // Store vertices belonging to each group
+    
+    // Initialize a color vector with all vertices marked as unvisited (value 4)
+    std::vector<size_t> color(numVertices, 2);
+    
+    // Vector to store vertices belonging to each of the two groups
+    std::vector<std::vector<size_t>> groups(2);
+    
+    // Boolean flag to check if the graph is bipartite
     bool isBipartite = true;
 
+    // Iterate through all vertices
     for (size_t i = 0; i < numVertices; ++i) {
-        if (color[i] == 4) { // If vertex is unvisited
+        // If the vertex is unvisited
+        if (color[i] == 2) {
+            // Initialize a queue for BFS and push the current vertex
             std::queue<int> q;
             q.push(i);
-            color[i] = 0; // Assign color 0 to starting vertex
+            
+            // Assign the starting vertex the color 0
+            color[i] = 0;
 
-            while (!q.empty()) {
-                size_t u =  static_cast<size_t>(q.front());
+            // Perform BFS
+            while (!q.empty() && isBipartite) {
+                size_t u = static_cast<size_t>(q.front());
                 q.pop();
+                
+                // Add the current vertex to its corresponding group
                 groups[color[u]].push_back(u);
 
-                for (size_t v=0; v< numVertices; v++) {
-                    for (size_t j=0; j< numVertices; j++) {
-                        if(g.getAdjMatrix()[v][j]!=0){
-                            if (color[j] == 4) { // If neighbor is unvisited
-                                color[j] = 1 - color[v]; // Assign opposite color to neighbor
-                                q.push(j);
-                            } else if (color[j] == color[v]) { // If neighbor has same color
-                                isBipartite = false;
-                            }
-                }}}
+                // Check all vertices for adjacency
+                for (size_t v = 0; v < numVertices; v++) {
+                    // Check if there's an edge between vertex u and vertex v
+                    if (g.getAdjMatrix()[u][v] != 0) {
+                        // If the neighbor vertex v is unvisited
+                        if (color[v] == 2) {
+                            // Assign the opposite color to the neighbor
+                            color[v] = 1 - color[u];
+                            // Push the neighbor to the queue for further processing
+                            q.push(v);
+                        } else if (color[v] == color[u]) {
+                            // If the neighbor has the same color as the current vertex, the graph is not bipartite
+                            isBipartite = false;
+                            break;
+                        }
+                    }
+                }
             }
         }
     }
 
+    // Output the result
     if (!isBipartite) {
         std::cout << "Graph is not bipartite." << std::endl;
     } else {
@@ -449,5 +551,5 @@ void Algorithms::isBipartite(Graph &g) {
         std::cout << std::endl;
     }
 
-    return;
+    return isBipartite;
 }

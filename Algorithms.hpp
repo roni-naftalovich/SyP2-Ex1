@@ -28,9 +28,9 @@ namespace ariel
 
         static bool isContainsCycle(Graph &g);
 
-        static void isBipartite(Graph &g);
+        static bool isBipartite(Graph &g);
 
-        static void negativeCycle(Graph &g);
+        static bool negativeCycle(Graph &g);
     };
 }
 #endif

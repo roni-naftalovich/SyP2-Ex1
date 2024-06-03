@@ -19,7 +19,10 @@ namespace ariel
         bool isDirected;
         bool isWeighted;
 
+
     public:
+
+        Graph();
         // Constructor that getting  if the graph is directed or not
         Graph(bool isDirected); // default constructor is not directed
 

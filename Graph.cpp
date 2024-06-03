@@ -7,6 +7,11 @@
 using namespace std;
 using namespace ariel;
 
+Graph::Graph(){
+    this->isDirected = false; //temporarly
+    this->isWeighted = false; //temporarly
+    this->numVertices = 0;
+}
 
 Graph::Graph(bool isDirected)
 {
@@ -34,7 +39,7 @@ bool Graph::getisDirected() const
 void Graph::loadGraph(vector<vector<int>> &matrix)
 {
     if (matrix.size() !=  matrix[0].size() || matrix.size()==0) {
-            cerr << "Invalid adjacency matrix - not square" << endl;
+            throw std::invalid_argument("Graphs must be of the same size.");
             return;
         }
 
